@@ -1,10 +1,18 @@
 import pandas, numpy, itables
 
+# from itables import init_notebook_mode
+
 
 class InteractiveTable:
+    ###
+    #
+    #   CORE
+    #
     def __init__(self, dataframe: pandas.DataFrame):
+        # init_notebook_mode(connected=True)
+
         self.__dataframe = dataframe.copy(deep=True)
-        self.__dataframe.reset_index(inplace=True, drop=True)
+        self.__dataframe.reset_index(inplace=True)  # Forces the index to be shown by iTables
 
         self.__max_bytes = 0
         self.__paging = True
@@ -27,19 +35,33 @@ class InteractiveTable:
     def show(self):
         itables.show(self.__dataframe, **self.config)
 
-    def limit_rows(self, max_rows: int):
+    ###
+    #
+    #   BASIC USAGE
+    #
+    def head(self, max_rows: int):
         self.__dataframe = self.__dataframe.head(max_rows)
 
         return self
 
-    def show_index(self, start_value: int = 0):
-        # TODO: check if there is already an index column
+    def drop_index(self):
+        self.__dataframe.drop(columns=["index"], inplace=True)
+
+        return self
+
+    def create_index(self, start_value: int = 0):
+        if "index" in self.__dataframe.columns:
+            self.drop_index()
 
         self.__dataframe.index = numpy.arange(start_value, len(self.__dataframe) + start_value)
         self.__dataframe.reset_index(inplace=True)
 
         return self
 
+    ###
+    #
+    #   ORDERING
+    #
     def unordered(self):
         self.__order = []
 
@@ -57,6 +79,10 @@ class InteractiveTable:
 
         return self
 
+    ###
+    #
+    #   LAYOUT
+    #
     def show_entries_menu(self, entries_list: list[int]):
         self.__entries_list = entries_list
 
